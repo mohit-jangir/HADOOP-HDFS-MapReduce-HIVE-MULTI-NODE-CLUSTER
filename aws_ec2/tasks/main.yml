@@ -1,0 +1,35 @@
+---
+# tasks file for aws-ec2
+- name: launching AWS instance for configuring Hadoop-multi-node-cluster
+  ec2:
+      key_name: "{{ key }}"
+      instance_type: "{{ instanceType }}"
+      image: "{{ image_id }}"
+      instance_tags: 
+          Name: "{{item}}"
+          Env: development
+      region: "{{ region_name }}"
+      group_id: "{{ security_group_results.group_id }}"
+      vpc_subnet_id: "{{ subnet_result.subnet.id  }}"
+      wait: yes
+      count: 1
+      assign_public_ip: yes
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+  loop: "{{ Os_Names }}" 
+  register: ec2
+
+- name: "Showing Master Public IP"
+  debug:
+     msg: "This is Master Public IP : => {{ ec2.results[0].instances[0].public_ip }}"
+
+- name: Refreshing inventory for new instances to come into the updated inventory
+  meta: refresh_inventory
+
+#- name: set facts or saving ec2 variable value to be used by other hosts
+#  debug:
+#      var: hostvars['127.0.0.1'].ec2.results[0].instances[0].public_ip
+
+#- name: "Pausing playbook for 60 seconds"
+#  pause:
+#    seconds: 60

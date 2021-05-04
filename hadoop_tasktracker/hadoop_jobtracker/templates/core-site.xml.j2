@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+
+<property>
+<name>fs.default.name</name>
+<value>hdfs://{{ hostvars[groups['tag_Name_hadoop_namenode'][0]].ec2_private_ip_address }}:9001</value>
+</property>
+
+</configuration>

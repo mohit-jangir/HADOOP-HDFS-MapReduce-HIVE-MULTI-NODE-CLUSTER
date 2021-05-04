@@ -1,0 +1,54 @@
+- hosts: localhost
+  vars_files:
+    - aws_cred.yml
+  roles:
+  - name: "Creating AWS VPC"
+    role: aws_vpc_launch
+
+  - name: "Provisioning EC2 Instances"
+    role: aws_ec2
+
+
+- hosts: tag_Name_hadoop_namenode
+  tasks:
+    - name: Running Hadoop Master Role
+      include_role:
+        name: hadoop_master
+
+- hosts: tag_Name_hadoop_datanode*
+  tasks:
+    - name: Running Hadoop Slave Role
+      include_role:
+        name: hadoop_slave
+
+- hosts: tag_Name_hadoop_jobtracker
+  tasks:
+    - name: Running Hadoop Jobtracker Role
+      include_role:
+        name: hadoop_jobtracker
+
+- hosts: tag_Name_hadoop_tasktracker*
+  tasks:
+    - name: Running Hadoop Tasktracker Role
+      include_role:
+        name: hadoop_tasktracker
+
+- hosts: tag_Name_hadoop_client
+  tasks:
+  - name: Running Hadoop Client Role
+    include_role:
+      name: hadoop_client
+  
+  - name: Getting The Report Of All Active DataNodes
+    shell: "hadoop dfsadmin -report"
+    register: datanodes
+
+  - debug:
+      var: datanodes.stdout_lines
+
+  - name: Retrieving The list Of All Active TaskTrackers
+    shell: "hadoop job -list-active-trackers"
+    register: tasktrackers
+
+  - debug:
+      var: tasktrackers.stdout_lines
