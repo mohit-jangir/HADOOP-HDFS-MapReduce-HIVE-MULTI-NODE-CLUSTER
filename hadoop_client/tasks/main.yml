@@ -10,10 +10,28 @@
     url: https://archive.apache.org/dist/hadoop/core/hadoop-1.2.1/hadoop-1.2.1-1.x86_64.rpm
     dest: /root/hadoop.rpm
 
+- name: Download Hive Software
+  get_url:
+    url: https://archive.apache.org/dist/hive/hive-0.13.1/apache-hive-0.13.1-bin.tar.gz
+    dest: /root/
+    
 - name: Install Packages
   command : "rpm -i /root/{{ item }} --force"
   loop: "{{ pkgs_name }}"
 
+- name: "Untar hive software in /opt folder"
+  shell: "tar -xvzf /root/apache-hive-0.13.1-bin.tar.gz -C /opt/"
+
+- name: "Rename hive software"
+  shell: "mv /opt/apache-hive-0.13.1-bin/ /opt/apache-hive"
+
+- name: "Set hive home directory and path permanently"
+  blockinfile:
+         path: "/root/.bashrc"
+         block: |
+                 export HIVE_HOME=/opt/apache-hive/
+                 export PATH=/opt/apache-hive/bin/:$PATH
+                 
 - name: Configure core-site file 
   template:
     src: "core-site.xml.j2"
@@ -24,15 +42,3 @@
     src: "mapred-site.xml.j2"
     dest: "/etc/hadoop/mapred-site.xml"
 
-- name: "Untar hive software in /opt folder"
-    shell: "tar -xvzf /hivesoftware/apache-hive-0.13.1-bin.tar.gz -C /opt/"
-
-  - name: "Rename hive software"
-    shell: "mv /opt/apache-hive-0.13.1-bin/ /opt/apache-hive"
-
-  - name: "Set hive home directory and path permanently"
-    blockinfile:
-            path: "/root/.bashrc"
-            block: |
-                    export HIVE_HOME=/opt/apache-hive/
-                    export PATH=/opt/apache-hive/bin/:$PATH
